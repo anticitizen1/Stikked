@@ -203,7 +203,7 @@ class Pastes extends CI_Model
 		
 		if ($inreply) 
 		{
-			$this->db->select('name, title');
+			$this->db->select('name, title, raw');
 			$this->db->where('pid', $inreply);
 			$query = $this->db->get('pastes');
 			
@@ -214,6 +214,14 @@ class Pastes extends CI_Model
 					$data['inreply']['title'] = $row['title'];
 					$data['inreply']['name'] = $row['name'];
 					$data['inreply']['url'] = site_url('view/' . $inreply);
+
+					//diff
+					include_once ('./application/libraries/finediff.php');
+					$from_text = $data['raw'];
+					$to_text = $row['raw'];
+					$opcodes = FineDiff::getDiffOpcodes($from_text, $to_text);
+					$to_text = FineDiff::renderToTextFromOpcodes($from_text, $opcodes);
+					$data['paste'] = nl2br(FineDiff::renderDiffToHTMLFromOpcodes($from_text, $opcodes));
 				}
 			}
 			else
